@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JpaBuddyIdeaProjectConfig">
+    <option name="reLastEntityCreationPackage" value="src/main/java/org/example/model" />
+    <option name="reverseEngineeringLastDbConnectionId" value="d9c3b33b-a2c2-48ed-bca3-efb26723a195" />
+  </component>
+  <component name="PersistenceUnitSettings">
+    <persistence-units>
+      <persistence-unit moduleName="HotelReservation" name="hotel_pu" framework="JPA" ormUnit="HotelReservation:hotel_pu" defaultDataSourceId="b18dca9c-7f74-430a-9658-61c732c28aba__hotel_public" />
+    </persistence-units>
+  </component>
+</project>
