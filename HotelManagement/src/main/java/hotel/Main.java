@@ -21,17 +21,12 @@ public class Main {
             System.out.println("1. View available rooms");
             System.out.println("2. Book room");
             System.out.println("3. Cancel reservation");
-            System.out.println("4. Check customer reservations");
-            System.out.println("5. Check-in");
-            System.out.println("6. Check-out");
-            System.out.println("7. Show all bookings");
-            System.out.println("8. Search by customer name");
-
-
-            System.out.println("9. Save All");
-            System.out.println("10. Load All");
-
-
+            System.out.println("4. Check-in");
+            System.out.println("5. Check-out");
+            System.out.println("6. Show all bookings");
+            System.out.println("7. Search by customer name");
+            System.out.println("8. Save All");
+            System.out.println("9. Load All");
             System.out.println("0. Exit");
 
             System.out.print("Choose: ");
@@ -46,19 +41,17 @@ public class Main {
 
                 case 3 -> service.cancel();
 
-                case 4 -> service.searchByCustomer();
+                case 4 -> service.checkIn();
 
-                case 5 -> service.checkIn();
+                case 5 -> service.checkOut();
 
-                case 6 -> service.checkOut();
+                case 6 -> service.showAll();
 
-                case 7 -> service.showAll();
+                case 7 -> service.searchByCustomerName();
 
-                case 8 -> service.searchByCustomerName();
+                case 8 -> service.saveAll();
 
-                case 9 -> service.saveAll();
-
-                case 10 -> service.loadAll();
+                case 9 -> service.loadAll();
 
                 case 0 -> {
                     System.out.println("Goodbye!");

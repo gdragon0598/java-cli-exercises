@@ -17,7 +17,7 @@ public class HotelService {
 
     Scanner sc = new Scanner(System.in);
 
-    // 1. VIEW ROOMS
+    // show các loại phòng  ----------------------------------------------------------------------------
     public void viewRooms() {
         for (Room r : DataStore.rooms) {
             if (r.isAvailable()) {
@@ -26,28 +26,26 @@ public class HotelService {
         }
     }
 
-    // 2. BOOK ROOM
+    // book room  ----------------------------------------------------------------------------
     public void bookRoom() {
 
+        // nhập thông tin customer book phòng nào
         System.out.print("Customer name: ");
         String name = sc.nextLine();
-        while (true) {
 
-
-            if (Validation.isValidName(name)) {
-                break;
-            }
+        while (!Validation.isValidName(name)) {
             System.out.println("Invalid customer name!");
+            System.out.print("Customer name: ");
+            name = sc.nextLine();
         }
 
         System.out.print("Phone: ");
         String phone = sc.nextLine();
-        while (true) {
 
-            if (Validation.isValidPhone(phone)) {
-                break;
-            }
+        while (!Validation.isValidPhone(phone)) {
             System.out.println("Phone must contain 10 digits!");
+            System.out.print("Phone: ");
+            phone = sc.nextLine();
         }
 
         Customer customer = new Customer(
@@ -56,12 +54,11 @@ public class HotelService {
                 phone
         );
 
+        // room valid
         Room room;
 
         while (true) {
-
             try {
-
                 System.out.print("Room ID: ");
                 int roomId = Integer.parseInt(sc.nextLine());
 
@@ -72,25 +69,18 @@ public class HotelService {
                     continue;
                 }
 
-                if (!room.isAvailable()) {
-                    System.out.println("Room is not available! Please choose another room.");
-                    continue;
-                }
-
                 break;
 
             } catch (NumberFormatException e) {
                 System.out.println("Room ID must be a number!");
             }
-
         }
 
+        // check in valid
         LocalDate checkIn;
 
         while (true) {
-
             try {
-
                 System.out.print("Check-in date (yyyy-MM-dd): ");
                 checkIn = LocalDate.parse(sc.nextLine());
 
@@ -104,19 +94,18 @@ public class HotelService {
             } catch (Exception e) {
                 System.out.println("Invalid date format! Use yyyy-MM-dd");
             }
-
         }
+
+        // check out valid
         LocalDate checkOut;
 
         while (true) {
-
             try {
-
                 System.out.print("Check-out date (yyyy-MM-dd): ");
                 checkOut = LocalDate.parse(sc.nextLine());
 
                 if (!checkOut.isAfter(checkIn)) {
-                    System.out.println("Check-out date must be after check-in date!");
+                    System.out.println("Check-out must be after check-in!");
                     continue;
                 }
 
@@ -125,7 +114,25 @@ public class HotelService {
             } catch (Exception e) {
                 System.out.println("Invalid date format! Use yyyy-MM-dd");
             }
+        }
 
+        // check trùng phòng
+        for (Reservation r : DataStore.reservations) {
+
+            if (r.getRoom().getRoomId() == room.getRoomId()) {
+
+                LocalDate existingCheckIn = r.getCheckIn();
+                LocalDate existingCheckOut = r.getCheckOut();
+
+                boolean overlap =
+                        existingCheckIn.isBefore(checkOut) &&
+                                existingCheckOut.isAfter(checkIn);
+
+                if (overlap) {
+                    System.out.println("Room is already booked for selected dates!");
+                    return;
+                }
+            }
         }
 
         int reservationId = 1;
@@ -145,9 +152,6 @@ public class HotelService {
         );
 
         DataStore.customers.add(customer);
-
-        room.setAvailable(false);
-
         DataStore.reservations.add(reservation);
 
         System.out.println("\n===== BOOKING SUCCESS =====");
@@ -161,7 +165,7 @@ public class HotelService {
         System.out.println("Total Price: " + reservation.calculatePrice());
     }
 
-    // 3. CANCEL
+    // cancel reservation  ----------------------------------------------------------------------------
     public void cancel() {
         System.out.print("Reservation ID: ");
         int id = Integer.parseInt(sc.nextLine());
@@ -182,37 +186,7 @@ public class HotelService {
         }
     }
 
-    // 4. SEARCH CUSTOMER (OPTIONAL FEATURE)
-    public void searchByCustomer() {
-
-        System.out.print("Customer name: ");
-        String name = sc.nextLine();
-
-        boolean found = false;
-
-        for (Reservation r : DataStore.reservations) {
-
-            if (r.getCustomer()
-                    .getCustomerName()
-                    .equalsIgnoreCase(name)) {
-
-                System.out.println(
-                        "Reservation ID: " + r.getReservationId()
-                                + " | Room: " + r.getRoom().getRoomNumber()
-                                + " | Type: " + r.getRoom().getType()
-                                + " | Price: " + r.calculatePrice()
-                );
-
-                found = true;
-            }
-        }
-
-        if (!found) {
-            System.out.println("No reservation found!");
-        }
-    }
-
-    // 5. CHECK IN
+    // check in ----------------------------------------------------------------------------
     public void checkIn() {
 
         try {
@@ -236,7 +210,7 @@ public class HotelService {
         }
     }
 
-    // 6. CHECK OUT
+    //check out-----------------------------------------------------------------------------
     public void checkOut() {
 
         try {
@@ -260,7 +234,7 @@ public class HotelService {
         }
     }
 
-    // 7. SHOW ALL
+    //show tất cả-----------------------------------------------------------------------------
     public void showAll() {
 
         if (DataStore.reservations.isEmpty()) {
@@ -283,7 +257,7 @@ public class HotelService {
     }
 
 
-    //search by customer name
+    //search by customer name-----------------------------------------------------------------------------
     public void searchByCustomerName() {
         System.out.print("Enter customer name: ");
         String name = sc.nextLine();
@@ -309,7 +283,7 @@ public class HotelService {
         }
     }
 
-    //Calculate price
+    //Calculate price-----------------------------------------------------------------------------
     public void calculatePrice() {
         System.out.print("Reservation ID: ");
         int id = Integer.parseInt(sc.nextLine());
@@ -323,7 +297,7 @@ public class HotelService {
         }
     }
 
-    //Save Room
+    //Save all -----------------------------------------------------------------------------
     public void saveRooms() {
         try (ObjectOutputStream out =
                      new ObjectOutputStream(new FileOutputStream("rooms.dat"))) {
@@ -335,7 +309,6 @@ public class HotelService {
     }
 
 
-    //Save customer
     public void saveCustomers() {
         try (ObjectOutputStream out =
                      new ObjectOutputStream(new FileOutputStream("customers.dat"))) {
@@ -346,7 +319,6 @@ public class HotelService {
         }
     }
 
-    //save Reservationes
     public void saveReservations() {
         try (ObjectOutputStream out =
                      new ObjectOutputStream(new FileOutputStream("reservations.dat"))) {
@@ -363,7 +335,7 @@ public class HotelService {
         System.out.println("All data saved successfully!");
     }
 
-    //Load room
+    //Load all -----------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
     public void loadRooms() {
         try (ObjectInputStream in =
@@ -375,7 +347,7 @@ public class HotelService {
         }
     }
 
-    //load customer
+
     @SuppressWarnings("unchecked")
     public void loadCustomers() {
         try (ObjectInputStream in =
@@ -387,7 +359,6 @@ public class HotelService {
         }
     }
 
-    //load reservation
     @SuppressWarnings("unchecked")
     public void loadReservations() {
         try (ObjectInputStream in =
@@ -406,7 +377,7 @@ public class HotelService {
         System.out.println("All data loaded successfully!");
     }
 
-    //Find room
+    //Find room-----------------------------------------------------------------------------
     public Room findRoom(int id) {
         for (Room r : DataStore.rooms) {
             if (r.getRoomId()== id) return r;
@@ -414,6 +385,7 @@ public class HotelService {
         return null;
     }
 
+    //Find reservation-----------------------------------------------------------------------------
     public Reservation findReservation(int id) {
         for (Reservation r : DataStore.reservations) {
             if (r.getReservationId() == id) return r;
