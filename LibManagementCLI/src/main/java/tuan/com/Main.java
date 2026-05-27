@@ -3,12 +3,12 @@ package tuan.com;
 import tuan.com.utils.ScannerUtils;
 
 public class Main {
-    static LibraryService libraryService = LibraryService.getInstance();
-
+    private static LibraryService libraryService = LibraryService.getLibraryService();
     public static void main(String[] args) {
+        // DEMO 2 User add books
         libraryService.insertMockData();
-        Thread t1 = new Thread(new User1(libraryService), "Luong 1");
-        Thread t2 = new Thread(new User2(libraryService), "Luong 2");
+        Thread t1 = new Thread(new User1(), "Luong 1");
+        Thread t2 = new Thread(new User2(), "Luong 2");
         t1.start();
         t2.start();
 
@@ -18,8 +18,7 @@ public class Main {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
-//      libraryService.viewAvailableBook();
+        //
         menuOptions();
     }
 

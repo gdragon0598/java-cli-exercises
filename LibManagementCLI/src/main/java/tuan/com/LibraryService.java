@@ -9,23 +9,25 @@ import tuan.com.utils.SearchEngine;
 
 import java.time.LocalDate;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class LibraryService {
-    private static LibraryService instance;
-    private static final Map<Integer, Book> bookMap = new LinkedHashMap<>();
-    private static final Map<Integer, BorrowRecord> borrowRecordMap = new LinkedHashMap<>();
-    public static SearchEngine searchEngine = new SearchEngine();
+    private static LibraryService libraryService;
+    private final Map<Integer, Book> bookMap = new ConcurrentHashMap<>();
+    private final Map<Integer, BorrowRecord> borrowRecordMap = new ConcurrentHashMap<>();
+    private final AtomicInteger idGenerater = new AtomicInteger(0);
+    private final SearchEngine searchEngine = new SearchEngine();
 
-    private LibraryService(){}
+    private LibraryService() {
+    }
 
-    public static LibraryService getInstance() {
-        if (instance == null) {
-            instance = new LibraryService();
-        }
-        return instance;
+    public static LibraryService getLibraryService() {
+        if (libraryService == null)
+            libraryService = new LibraryService();
+        return libraryService;
     }
 
     public void insertMockData() {
@@ -47,11 +49,11 @@ public class LibraryService {
         searchEngine.addBooks(bookMap);
     }
 
-    public synchronized void addNewBook() {
-        int nextId = Collections.max(bookMap.keySet()) + 1;
+    public void addNewBook() {
+        int nextId = idGenerater.incrementAndGet();
         System.out.println("# Add Book");
 
-        String[] requires = { "Enter name book: ", "Enter author: ", "Enter Description: " };
+        String[] requires = {"Enter name book: ", "Enter author: ", "Enter Description: "};
         String[] inputs = new String[requires.length];
 
         enterBookInfo(requires, inputs);
@@ -66,8 +68,14 @@ public class LibraryService {
         searchEngine.addBook(book);
     }
 
-    public synchronized void addNewBook(String nameBook, String auth, String desc) {
-        int nextId = Collections.max(bookMap.keySet()) + 1;
+    public void addNewBook(String nameBook, String auth, String desc) {
+        boolean isExistBook = !searchEngine.search(nameBook).isEmpty();
+
+        if (isExistBook) {
+            throw new RuntimeException("Book " + nameBook + " already exist!");
+        }
+
+        int nextId = idGenerater.incrementAndGet();
         Book book = new Book();
 
         book.setId(nextId);
@@ -75,8 +83,6 @@ public class LibraryService {
         book.setAuth(auth);
         book.setDesc(desc);
         book.setStatus(BookStatus.Available);
-
-        System.out.println("# Add Book > " + book);
 
         bookMap.put(nextId, book);
         searchEngine.addBook(book);
@@ -104,7 +110,7 @@ public class LibraryService {
         });
     }
 
-    public synchronized void borrowAvailableBook() {
+    public void borrowAvailableBook() {
         // try excep
         System.out.println("# Borrow Book");
         viewAvailableBook();
@@ -119,18 +125,19 @@ public class LibraryService {
             }
 
             Book book = bookMap.get(bookId);
-            if (book == null) {
-                System.out.println("Id book invalid");
-                return;
-            }
+            if (book == null)
+                throw new RuntimeException("Id book invalid!");
+
+            if (book.getStatus() == BookStatus.Borrowed)
+                throw new RuntimeException("Book is not available!");
 
             int nextId = Collections.max(borrowRecordMap.keySet()) + 1;
             borrowRecordMap.put(nextId, new BorrowRecord(nextId, book, fromDate, toDate));
             book.setStatus(BookStatus.Borrowed);
 
             System.out.println("Borrow book success !");
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+        } catch (RuntimeException e) {
+            System.out.println("Borrow book: " + e.getMessage());
         }
     }
 

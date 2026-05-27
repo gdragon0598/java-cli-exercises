@@ -36,9 +36,7 @@ public class SearchEngine {
         TrieNode<Book> current = root;
         String simpleTitle = title.toLowerCase();
         for (char c : simpleTitle.toCharArray()) {
-            if (current.children.containsKey(c)) {
-                current = current.children.get(c);
-            }
+            current = current.children.get(c);
 
             if (current == null)
                 return new ArrayList<>();
